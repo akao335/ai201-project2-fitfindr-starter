@@ -16,36 +16,38 @@ You must have at least 3 tools. The three required tools are listed — add any 
 
 **What it does:**
 <!-- Describe what this tool does in 1–2 sentences -->
-
+FitFindr will you search for a new article of clothing to go with your style.
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `description` (str): ...
-- `size` (str): ...
-- `max_price` (float): ...
+- `description` (str): Description of the type of clothing they are looking for as well as a style. 
+- `size` (str): The user's clothing size.
+- `max_price` (float): The max price the user is willing to spend. 
 
 **What it returns:**
 <!-- Describe the return value — what fields does a result contain? -->
+The result contains a suggestion of an article of clothing based on the preferences. 
 
 **What happens if it fails or returns nothing:**
 <!-- What should the agent do if no listings match? -->
-
+It will prompt the user to try again with a different prompt and not suggest a outfit. 
 ---
 
 ### Tool 2: suggest_outfit
 
 **What it does:**
 <!-- Describe what this tool does in 1–2 sentences -->
-
+Based on the item recommended, it will suggest the user a outfit based on their preferences and style. 
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `new_item` (dict): ...
-- `wardrobe` (dict): ...
+- `new_item` (dict): The item suggested
+- `wardrobe` (dict): Clothing that is in the user's wardrobe currently.
 
 **What it returns:**
 <!-- Describe the return value -->
-
+A suggested outfit and a blurb of how to style the outfit with their current articles of clothing. 
 **What happens if it fails or returns nothing:**
 <!-- What should the agent do if the wardrobe is empty or no outfit can be suggested? -->
+
 
 ---
 
@@ -53,14 +55,14 @@ You must have at least 3 tools. The three required tools are listed — add any 
 
 **What it does:**
 <!-- Describe what this tool does in 1–2 sentences -->
-
+It will create a shareable outfit description of the geerated outfit suggestion
 **Input parameters:**
 <!-- List each parameter, its type, and what it represents -->
-- `outfit` (...): ...
+- `outfit` (...): suggestion of the full outfit
 
 **What it returns:**
 <!-- Describe the return value -->
-
+Returns a description of the suggested outfit that is shareable.
 **What happens if it fails or returns nothing:**
 <!-- What should the agent do if the outfit data is incomplete? -->
 
@@ -76,7 +78,7 @@ You must have at least 3 tools. The three required tools are listed — add any 
 
 **How does your agent decide which tool to call next?**
 <!-- Describe the logic your planning loop uses. What does it look at? What conditions change its behavior? How does it know when it's done? -->
-
+The agent starts with searching for a item based on the  user's preferences by calling search_listings. If this is successful, then it will continue to call the suggest_outfit tool. After generating the outfit, the tool create_fit_card will be called. Once that tool is finisthed returning, the agent will be finished with its output. If the initial search_listings did not find anything, the suggest_outfit tool will not be called and the agent will return nothing and prompt the user to try a different prompt. 
 ---
 
 ## State Management
