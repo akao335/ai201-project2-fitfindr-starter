@@ -17,8 +17,14 @@ Usage (once implemented):
     print(result["fit_card"])
     print(result["error"])   # None on success
 """
-
+import re
+import os
+import json
+from dotenv import load_dotenv
+from groq import Groq
 from tools import search_listings, suggest_outfit, create_fit_card
+
+load_dotenv()
 
 
 # ── session state ─────────────────────────────────────────────────────────────
@@ -46,6 +52,31 @@ def _new_session(query: str, wardrobe: dict) -> dict:
 
 
 # ── planning loop ─────────────────────────────────────────────────────────────
+def _parse_query(query: str) -> dict:
+    """
+    Use the LLM to extract description, size, and max_price from a natural
+    language query. Returns a dict with those three keys.
+    """
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+    prompt = (
+        f"Extract search parameters from this clothing query: '{query}'\n\n"
+        f"Return ONLY a JSON object with exactly these three keys:\n"
+        f"- description (str): the item description and style keywords\n"
+        f"- size (str or null): clothing size if mentioned, otherwise null\n"
+        f"- max_price (float or null): maximum price if mentioned, otherwise null\n\n"
+        f"Example: {{\"description\": \"vintage graphic tee\", \"size\": \"M\", \"max_price\": 30.0}}\n"
+        f"Return only the JSON object, no explanation, no markdown."
+    )
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=100,
+    )
+    import json
+    text = response.choices[0].message.content.strip()
+    # Strip markdown fences if LLM adds them anyway
+    text = re.sub(r"```json|```", "", text).strip()
+    return json.loads(text)
 
 def run_agent(query: str, wardrobe: dict) -> dict:
     """
@@ -94,7 +125,44 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     """
     # TODO: implement the planning loop
     session = _new_session(query, wardrobe)
-    session["error"] = "Planning loop not yet implemented."
+
+    # Step 2 — parse the query
+    try:
+        session["parsed"] = _parse_query(query)
+    except Exception as e:
+        session["error"] = f"Could not parse your query. Try being more specific. ({e})"
+        return session
+
+    parsed = session["parsed"]
+    description = parsed.get("description", query)
+    size = parsed.get("size")
+    max_price = parsed.get("max_price")
+
+    # search listings
+    session["search_results"] = search_listings(description, size, max_price)
+
+    if not session["search_results"]:
+        session["error"] = (
+            "No listings found for that search. "
+            "Try broader keywords, a larger size range, or a higher max price."
+        )
+        return session
+
+    #  select top result
+    session["selected_item"] = session["search_results"][0]
+
+    #  suggest outfit
+    session["outfit_suggestion"] = suggest_outfit(
+        session["selected_item"],
+        session["wardrobe"]
+    )
+
+    #  create fit card
+    session["fit_card"] = create_fit_card(
+        session["outfit_suggestion"],
+        session["selected_item"]
+    )
+
     return session
 
 
