@@ -140,12 +140,18 @@ Write out what a full user interaction looks like from start to finish — tool 
 
 **Step 1:**
 <!-- What does the agent do first? Which tool is called? With what input? -->
+The agent will call  search_listings("vintage graphic tee", size=None, max_price=30.0)
 
 **Step 2:**
 <!-- What happens next? What was returned from step 1? What tool is called now? -->
+This will return a result of the selected item. Then the agent will call suggest_outfit new_item=session"selected_item"
 
 **Step 3:**
 <!-- Continue until the full interaction is complete -->
+This will return a suggestion of a outfit using the selected item and the user's wardrobe. Then the agent will call create_fit_card(outfit=session["outfit_suggestion"])
+This will return a description of the outfit.
+
 
 **Final output to user:**
 <!-- What does the user actually see at the end? -->
+The fit card string is displayed to the user.
