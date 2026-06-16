@@ -85,7 +85,15 @@ The agent starts with searching for a item based on the  user's preferences by c
 
 **How does information from one tool get passed to the next?**
 <!-- Describe how your agent stores and accesses state within a session. What data is tracked? How is it passed between tool calls? -->
+The agent uses a session dict to pass data between tools within one interaction:
+- `session["selected_item"]`: top listing dict from search_listings
+- `session["outfit_suggestion"]`: string from suggest_outfit
+- `session["fit_card"]`: caption string from create_fit_card
+- `session["error"]`: set if any tool fails; stops further tool calls
 
+Each tool reads from the session and writes its result back before the next tool runs.
+
+---
 ---
 
 ## Error Handling
@@ -94,9 +102,9 @@ For each tool, describe the specific failure mode you're handling and what the a
 
 | Tool | Failure mode | Agent response |
 |------|-------------|----------------|
-| search_listings | No results match the query | |
-| suggest_outfit | Wardrobe is empty | |
-| create_fit_card | Outfit input is missing or incomplete | |
+| search_listings | No results match the query |Sets session["error"] with a message telling the user to try broader keywords or raise their max price. Does not call suggest_outfit.  |
+| suggest_outfit | Wardrobe is empty |  Calls LLM for general styling advice instead of wardrobe-specific combinations. Returns a non-empty string. |
+| create_fit_card | Outfit input is missing or incomplete | Returns "Cannot generate a fit card without an outfit suggestion." without calling the LLM. |
 
 ---
 
@@ -110,7 +118,25 @@ For each tool, describe the specific failure mode you're handling and what the a
      ASCII art, a Mermaid diagram (https://mermaid.js.org/syntax/flowchart.html), or an embedded
      sketch are all fine. You'll share this diagram with an AI tool when asking it to implement
      the planning loop and each individual tool. -->
+## Architecture
 
+flowchart TD
+    A[User Input] --> B[Planning Loop - run_agent]
+    B --> C[_parse_query via Groq LLM]
+    C --> D["search_listings(description, size, max_price)"]
+    D -->|results is empty| E["Set session[error]\nTell user to try broader keywords\nSTOP - do not call suggest_outfit"]
+    D -->|results found| F["session[selected_item] = results[0]"]
+    F --> G["suggest_outfit(selected_item, wardrobe)"]
+    G -->|wardrobe items is empty| H["LLM: general styling advice"]
+    G -->|wardrobe has items| I["LLM: specific outfit combinations"]
+    H --> J["session[outfit_suggestion] = result"]
+    I --> J
+    J --> K["create_fit_card(outfit_suggestion, selected_item)"]
+    K -->|outfit is empty string| L["Return error message string - STOP"]
+    K -->|valid input| M["LLM: generate caption at temperature 1.2"]
+    M --> N["session[fit_card] = result"]
+    N --> O["Return session to user"]
+```
 ---
 
 ## AI Tool Plan
