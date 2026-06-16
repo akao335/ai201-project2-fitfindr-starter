@@ -153,9 +153,9 @@ flowchart TD
      before trusting it" is a plan. -->
 
 **Milestone 3 — Individual tool implementations:**
-
+For each of the tools, I gave Claude the Tool specs, which includes the inputs, return value, and failure mode. I then ask Claude to implemenet the tools based on the given specs. Then I tested the code with multiple different test cases to ensure it works with different situations. This includes verifying that the failure modes work properly on each tool. 
 **Milestone 4 — Planning loop and state management:**
-
+I gave Claude the Architecture diagram and the State Management and Planning Loop sections form the planning.md. I had Claude implement the run_agent() function and verified the code.
 ---
 
 ## A Complete Interaction (Step by Step)

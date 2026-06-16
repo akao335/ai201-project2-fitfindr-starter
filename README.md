@@ -62,6 +62,33 @@ For each tool, describe the specific failure mode you're handling and what the a
 | create_fit_card | Outfit input is missing or incomplete | Returns "Cannot generate a fit card without an outfit suggestion." without calling the LLM. |
 
 ---
+
+## AI Tool Plan
+
+<!-- For each part of the implementation below, describe:
+     - Which AI tool you plan to use (Claude, Copilot, ChatGPT, etc.)
+     - What you'll give it as input (which sections of this planning.md, your agent diagram)
+     - What you expect it to produce
+     - How you'll verify the output matches your spec before moving on
+
+     "I'll use AI to help me code" is not a plan.
+     "I'll give Claude my Tool 1 spec (inputs, return value, failure mode) and ask it to implement
+     search_listings() using load_listings() from the data loader — then test it against 3 queries
+     before trusting it" is a plan. -->
+
+**Milestone 3 — Individual tool implementations:**
+For each of the tools, I gave Claude the Tool specs, which includes the inputs, return value, and failure mode. I then ask Claude to implemenet the tools based on the given specs. Then I tested the code with multiple different test cases to ensure it works with different situations. This includes verifying that the failure modes work properly on each tool. 
+**Milestone 4 — Planning loop and state management:**
+I gave Claude the Architecture diagram and the State Management and Planning Loop sections form the planning.md. I had Claude implement the run_agent() function and verified the code.
+---
+
+## Spec Reflection
+One way the spec helped:  
+Planning out what each tool is supposed to do before coding helped with being a guideline for how to code the tool. This made the tools easier to build. 
+
+One way the implementation divered from the spec: 
+The suggest_outfit tool produces a blurb of how to style the outfit. The output ended up being more specific than intended. It would sometimes return two full outfit breakdowns and styling tips. 
+
 ## Setup
 
 ```bash
