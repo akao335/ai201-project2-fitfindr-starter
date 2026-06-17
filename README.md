@@ -133,3 +133,6 @@ wardrobe = get_example_wardrobe()
 3. Build and test each tool individually before connecting them through your planning loop.
 
 Your implementation files go in this same directory. There's no required file structure for your agent code — organize it however makes sense for your design.
+
+## Demo Video
+https://www.loom.com/share/73d2be3629db4d08a1cb252d0ec28133
